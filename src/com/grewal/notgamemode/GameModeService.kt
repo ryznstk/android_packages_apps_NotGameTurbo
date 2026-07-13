@@ -46,6 +46,7 @@ class GameModeService : Service() {
         thread.quitSafely()
         if (gameModeActive) {
             TouchFeatureManager.setGameMode(false)
+            setOrientationTracking(false)
             gameModeActive = false
         }
         super.onDestroy()
@@ -66,7 +67,13 @@ class GameModeService : Service() {
         if (shouldEnable != gameModeActive) {
             gameModeActive = shouldEnable
             TouchFeatureManager.setGameMode(shouldEnable)
+            setOrientationTracking(shouldEnable)
         }
+    }
+
+    private fun setOrientationTracking(enabled: Boolean) {
+        val intent = Intent(this, TouchOrientationService::class.java)
+        if (enabled) startService(intent) else stopService(intent)
     }
 
     private fun currentForegroundPackage(): String? {

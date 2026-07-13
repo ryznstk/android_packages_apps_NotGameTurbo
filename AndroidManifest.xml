@@ -51,5 +51,9 @@
         <service
             android:name=".GameModeService"
             android:exported="false" />
+
+        <service
+            android:name=".TouchOrientationService"
+            android:exported="false" />
     </application>
 </manifest>

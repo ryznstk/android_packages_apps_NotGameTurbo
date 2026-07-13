@@ -18,6 +18,7 @@ object TouchFeatureManager {
     private const val TOUCH_ID = 0
     private const val TOUCH_GAME_MODE = 0
     private const val TOUCH_SUPER_REPORT = 202
+    private const val TOUCH_PANEL_ORIENTATION = 8
 
     @Volatile private var touchFeature: ITouchFeature? = null
 
@@ -57,5 +58,10 @@ object TouchFeatureManager {
         val value = if (enabled) 1 else 0
         setModeValue(TOUCH_GAME_MODE, value)
         setModeValue(TOUCH_SUPER_REPORT, value)
+    }
+
+    fun setPanelOrientation(rotation: Int) {
+        Log.i(TAG, "setPanelOrientation: $rotation")
+        setModeValue(TOUCH_PANEL_ORIENTATION, rotation)
     }
 }
