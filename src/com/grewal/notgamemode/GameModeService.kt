@@ -54,6 +54,11 @@ class GameModeService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private fun update() {
+
+        if (manualOverride) {
+            return
+        }
+
         val foreground = currentForegroundPackage() ?: lastForeground
         lastForeground = foreground
 
@@ -85,5 +90,7 @@ class GameModeService : Service() {
         private const val TAG = "GameModeService"
         private const val POLL_INTERVAL_MS = 2000L
         private const val QUERY_WINDOW_MS = 10_000L
+
+        @Volatile var manualOverride = false
     }
 }

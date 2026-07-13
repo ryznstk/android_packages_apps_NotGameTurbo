@@ -31,6 +31,13 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".TouchTestActivity"
+            android:configChanges="orientation|screenSize"
+            android:exported="false"
+            android:label="@string/touch_test_title"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen" />
+
         <receiver
             android:name=".BootReceiver"
             android:exported="true"

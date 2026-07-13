@@ -5,16 +5,21 @@
 
 package com.grewal.notgamemode
 
+import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.android.settingslib.widget.SettingsBasePreferenceFragment
 
-class GameModeFragment : PreferenceFragmentCompat() {
+class GameModeFragment : SettingsBasePreferenceFragment() {
 
     private lateinit var prefs: GamePrefs
 
@@ -33,6 +38,17 @@ class GameModeFragment : PreferenceFragmentCompat() {
             pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(0)).filter {
                 it.category == ApplicationInfo.CATEGORY_GAME && it.packageName !in custom
             }
+
+        screen.addPreference(
+            Preference(context).apply {
+                title = getString(R.string.touch_test_title)
+                summary = getString(R.string.touch_test_summary)
+                setOnPreferenceClickListener {
+                    startActivity(Intent(context, TouchTestActivity::class.java))
+                    true
+                }
+            }
+        )
 
         val games =
             PreferenceCategory(context).apply { title = getString(R.string.games_category_title) }
@@ -97,10 +113,32 @@ class GameModeFragment : PreferenceFragmentCompat() {
                 }
                 .sortedBy { label(pm, it) }
 
-        val labels = candidates.map { label(pm, it) }.toTypedArray()
+        val iconSize = (32 * resources.displayMetrics.density).toInt()
+        val iconPadding = (12 * resources.displayMetrics.density).toInt()
+        val adapter =
+            object :
+                ArrayAdapter<ApplicationInfo>(
+                    context,
+                    android.R.layout.select_dialog_item,
+                    android.R.id.text1,
+                    candidates,
+                ) {
+                override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                    val view = super.getView(position, convertView, parent)
+                    val app = candidates[position]
+                    val text = view.findViewById<TextView>(android.R.id.text1)
+                    text.text = label(pm, app)
+                    val icon =
+                        pm.getApplicationIcon(app).apply { setBounds(0, 0, iconSize, iconSize) }
+                    text.setCompoundDrawablesRelative(icon, null, null, null)
+                    text.compoundDrawablePadding = iconPadding
+                    return view
+                }
+            }
+
         AlertDialog.Builder(context)
             .setTitle(R.string.add_app_dialog_title)
-            .setItems(labels) { _, which ->
+            .setAdapter(adapter) { _, which ->
                 prefs.addCustom(candidates[which].packageName)
                 rebuild()
             }
