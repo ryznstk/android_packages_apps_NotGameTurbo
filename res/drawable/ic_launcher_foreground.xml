@@ -1,0 +1,39 @@
+<!--
+     SPDX-FileCopyrightText: bytedance IconPark
+     SPDX-License-Identifier: Apache-2.0
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="48"
+    android:viewportHeight="48">
+    <group
+        android:pivotX="24"
+        android:pivotY="24"
+        android:scaleX="0.55"
+        android:scaleY="0.55">
+        <path
+            android:strokeColor="#2E3A59"
+            android:strokeWidth="4"
+            android:strokeLineJoin="round"
+            android:pathData="M24,44 C35.0457,44 44,35.0457 44,24 C44,12.9543 35.0457,4 24,4 C12.9543,4 4,12.9543 4,24 C4,35.0457 12.9543,44 24,44 Z" />
+        <path
+            android:strokeColor="#2E3A59"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M30,24 L44,24" />
+        <path
+            android:strokeColor="#2E3A59"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M4,24 L18,24" />
+        <path
+            android:strokeColor="#2E3A59"
+            android:strokeWidth="4"
+            android:strokeLineJoin="round"
+            android:pathData="M24,18 A6,6 0 1 0 24,30 A6,6 0 1 0 24,18 Z" />
+        <path
+            android:fillColor="#2E3A59"
+            android:pathData="M24,22 A2,2 0 1 0 24,26 A2,2 0 1 0 24,22 Z" />
+    </group>
+</vector>
