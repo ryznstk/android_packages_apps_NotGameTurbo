@@ -60,23 +60,31 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
         val store = preferenceManager.sharedPreferences
         val screen = preferenceManager.createPreferenceScreen(context)
 
-        screen.addPreference(
+        val gameEnabled = store?.getBoolean(GamePrefs.enabledKey(pkg), false) ?: false
+
+        val masterSwitch =
             MainSwitchPreference(context).apply {
                 key = GamePrefs.enabledKey(pkg)
                 title = getString(R.string.app_enable_title)
                 setDefaultValue(false)
             }
-        )
+        screen.addPreference(masterSwitch)
 
-        screen.addPreference(
+        val superSwitch =
             SwitchPreferenceCompat(context).apply {
                 key = GamePrefs.superKey(pkg)
                 title = getString(R.string.super_report_title)
                 summary = getString(R.string.super_report_summary)
                 setDefaultValue(true)
                 isIconSpaceReserved = false
+                isEnabled = gameEnabled
             }
-        )
+        screen.addPreference(superSwitch)
+
+        masterSwitch.setOnPreferenceChangeListener { _, newValue ->
+            superSwitch.isEnabled = newValue as Boolean
+            true
+        }
 
         val tuning =
             PreferenceCategory(context).apply { title = getString(R.string.tuning_category_title) }
