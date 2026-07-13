@@ -12,10 +12,10 @@ import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.SeekBarPreference
 import androidx.preference.SwitchPreferenceCompat
 import com.android.settingslib.widget.MainSwitchPreference
 import com.android.settingslib.widget.SettingsBasePreferenceFragment
+import com.android.settingslib.widget.SliderPreference
 
 class AppSettingsFragment : SettingsBasePreferenceFragment() {
 
@@ -23,7 +23,7 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
     private val manualSliders = mutableListOf<Preference>()
     private var superSwitch: SwitchPreferenceCompat? = null
     private var expertSwitch: SwitchPreferenceCompat? = null
-    private var presetSlider: SeekBarPreference? = null
+    private var presetSlider: SliderPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val extra = requireActivity().intent.getStringExtra(AppSettingsActivity.EXTRA_PACKAGE)
@@ -99,14 +99,15 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
         val expert = TouchFeatureManager.EXPERT_RANGE
         val presetKey = GamePrefs.expertPresetKey(pkg)
         presetSlider =
-            SeekBarPreference(context).apply {
+            SliderPreference(context).apply {
                 key = presetKey
                 title = getString(R.string.expert_preset_title)
                 min = expert.min
                 max = expert.max
+                sliderIncrement = 1
+                setTickVisible(true)
                 value = store?.getInt(presetKey, expert.def) ?: expert.def
                 setDefaultValue(expert.def)
-                showSeekBarValue = true
                 isIconSpaceReserved = false
             }
         tuning.addPreference(presetSlider!!)
@@ -122,14 +123,15 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
         TouchFeatureManager.TUNING_RANGES.forEach { (mode, range) ->
             val key = GamePrefs.tuneKey(pkg, mode)
             val slider =
-                SeekBarPreference(context).apply {
+                SliderPreference(context).apply {
                     this.key = key
                     title = getString(labels.getValue(mode))
                     min = range.min
                     max = range.max
+                    sliderIncrement = 1
+                    setTickVisible(true)
                     value = store?.getInt(key, range.def) ?: range.def
                     setDefaultValue(range.def)
-                    showSeekBarValue = true
                     isIconSpaceReserved = false
                 }
             tuning.addPreference(slider)
