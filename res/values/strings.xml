@@ -16,7 +16,6 @@
 
     <string name="app_enable_title">Enable game mode</string>
     <string name="app_enabled">Enabled</string>
-    <string name="app_disabled">Tap to customize</string>
 
     <string name="touch_test_title">Test polling rate</string>
     <string name="touch_test_game_mode">Game mode</string>

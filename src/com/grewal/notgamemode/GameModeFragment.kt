@@ -112,10 +112,7 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
         return Preference(requireContext()).apply {
             title = label(pm, app)
             summary =
-                getString(
-                    if (prefs.isEnabled(app.packageName)) R.string.app_enabled
-                    else R.string.app_disabled
-                )
+                if (prefs.isEnabled(app.packageName)) getString(R.string.app_enabled) else null
             icon = pm.getApplicationIcon(app)
             setOnPreferenceClickListener {
                 startActivity(
