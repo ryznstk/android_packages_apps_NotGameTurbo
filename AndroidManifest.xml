@@ -9,6 +9,8 @@
     android:versionName="1.0"
     android:sharedUserId="android.uid.system">
 
+    <uses-sdk android:minSdkVersion="36" />
+
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
