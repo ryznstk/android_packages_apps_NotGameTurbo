@@ -21,7 +21,9 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
 
     private lateinit var pkg: String
     private val manualSliders = mutableListOf<Preference>()
-    private var presetSlider: Preference? = null
+    private var superSwitch: SwitchPreferenceCompat? = null
+    private var expertSwitch: SwitchPreferenceCompat? = null
+    private var presetSlider: SeekBarPreference? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         val extra = requireActivity().intent.getStringExtra(AppSettingsActivity.EXTRA_PACKAGE)
@@ -54,13 +56,13 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
 
     private fun buildScreen() {
         manualSliders.clear()
-        presetSlider = null
 
         val context = requireContext()
         val store = preferenceManager.sharedPreferences
         val screen = preferenceManager.createPreferenceScreen(context)
 
-        val gameEnabled = store?.getBoolean(GamePrefs.enabledKey(pkg), false) ?: false
+        var gameEnabled = store?.getBoolean(GamePrefs.enabledKey(pkg), false) ?: false
+        var expertOn = store?.getBoolean(GamePrefs.expertKey(pkg), false) ?: false
 
         val masterSwitch =
             MainSwitchPreference(context).apply {
@@ -70,29 +72,21 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
             }
         screen.addPreference(masterSwitch)
 
-        val superSwitch =
+        superSwitch =
             SwitchPreferenceCompat(context).apply {
                 key = GamePrefs.superKey(pkg)
                 title = getString(R.string.super_report_title)
                 summary = getString(R.string.super_report_summary)
                 setDefaultValue(true)
                 isIconSpaceReserved = false
-                isEnabled = gameEnabled
             }
-        screen.addPreference(superSwitch)
-
-        masterSwitch.setOnPreferenceChangeListener { _, newValue ->
-            superSwitch.isEnabled = newValue as Boolean
-            true
-        }
+        screen.addPreference(superSwitch!!)
 
         val tuning =
             PreferenceCategory(context).apply { title = getString(R.string.tuning_category_title) }
         screen.addPreference(tuning)
 
-        val expertOn = store?.getBoolean(GamePrefs.expertKey(pkg), false) ?: false
-
-        val expertSwitch =
+        expertSwitch =
             SwitchPreferenceCompat(context).apply {
                 key = GamePrefs.expertKey(pkg)
                 title = getString(R.string.expert_mode_title)
@@ -100,7 +94,7 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
                 setDefaultValue(false)
                 isIconSpaceReserved = false
             }
-        tuning.addPreference(expertSwitch)
+        tuning.addPreference(expertSwitch!!)
 
         val expert = TouchFeatureManager.EXPERT_RANGE
         val presetKey = GamePrefs.expertPresetKey(pkg)
@@ -114,7 +108,6 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
                 setDefaultValue(expert.def)
                 showSeekBarValue = true
                 isIconSpaceReserved = false
-                isEnabled = expertOn
             }
         tuning.addPreference(presetSlider!!)
 
@@ -138,16 +131,28 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
                     setDefaultValue(range.def)
                     showSeekBarValue = true
                     isIconSpaceReserved = false
-                    isEnabled = !expertOn
                 }
             tuning.addPreference(slider)
             manualSliders.add(slider)
         }
 
-        expertSwitch.setOnPreferenceChangeListener { _, newValue ->
-            val on = newValue as Boolean
-            manualSliders.forEach { it.isEnabled = !on }
-            presetSlider?.isEnabled = on
+        fun updateEnabled() {
+
+            superSwitch?.isEnabled = gameEnabled
+            expertSwitch?.isEnabled = gameEnabled
+            presetSlider?.isEnabled = gameEnabled && expertOn
+            manualSliders.forEach { it.isEnabled = gameEnabled && !expertOn }
+        }
+        updateEnabled()
+
+        masterSwitch.setOnPreferenceChangeListener { _, newValue ->
+            gameEnabled = newValue as Boolean
+            updateEnabled()
+            true
+        }
+        expertSwitch!!.setOnPreferenceChangeListener { _, newValue ->
+            expertOn = newValue as Boolean
+            updateEnabled()
             true
         }
 
