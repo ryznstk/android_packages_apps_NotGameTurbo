@@ -13,6 +13,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.Switch
 
 class TouchTestActivity : Activity() {
@@ -25,7 +26,8 @@ class TouchTestActivity : Activity() {
         root.addView(TouchTestView(this), FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
 
         val margin = (24 * resources.displayMetrics.density).toInt()
-        val toggle =
+        val controls = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        controls.addView(
             Switch(this).apply {
                 text = getString(R.string.touch_test_game_mode)
                 setTextColor(Color.WHITE)
@@ -33,8 +35,18 @@ class TouchTestActivity : Activity() {
                     TouchFeatureManager.setGameMode(checked)
                 }
             }
+        )
+        controls.addView(
+            Switch(this).apply {
+                text = getString(R.string.touch_test_super_report)
+                setTextColor(Color.WHITE)
+                setOnCheckedChangeListener { _, checked ->
+                    TouchFeatureManager.setSuperReport(checked)
+                }
+            }
+        )
         root.addView(
-            toggle,
+            controls,
             FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT, Gravity.TOP or Gravity.END).apply {
                 topMargin = margin
                 marginEnd = margin
@@ -54,6 +66,7 @@ class TouchTestActivity : Activity() {
         super.onPause()
 
         GameModeService.manualOverride = false
+        TouchFeatureManager.setSuperReport(false)
         TouchFeatureManager.setGameMode(false)
     }
 }

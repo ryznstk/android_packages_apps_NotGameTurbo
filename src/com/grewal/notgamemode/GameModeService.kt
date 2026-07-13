@@ -22,6 +22,7 @@ class GameModeService : Service() {
 
     private var lastForeground: String? = null
     private var gameModeActive = false
+    private var activePkg: String? = null
 
     private val poll =
         object : Runnable {
@@ -45,6 +46,7 @@ class GameModeService : Service() {
         handler.removeCallbacks(poll)
         thread.quitSafely()
         if (gameModeActive) {
+            TouchFeatureManager.setSuperReport(false)
             TouchFeatureManager.setGameMode(false)
             setOrientationTracking(false)
             gameModeActive = false
@@ -64,10 +66,41 @@ class GameModeService : Service() {
         lastForeground = foreground
 
         val shouldEnable = foreground != null && prefs.isEnabled(foreground)
-        if (shouldEnable != gameModeActive) {
-            gameModeActive = shouldEnable
-            TouchFeatureManager.setGameMode(shouldEnable)
-            setOrientationTracking(shouldEnable)
+        if (shouldEnable) {
+            if (!gameModeActive) {
+                gameModeActive = true
+                activePkg = foreground
+
+                applyTuning(foreground!!)
+                TouchFeatureManager.setGameMode(true)
+                TouchFeatureManager.setSuperReport(prefs.isSuperReport(foreground))
+                setOrientationTracking(true)
+            } else if (foreground != activePkg) {
+
+                activePkg = foreground
+                applyTuning(foreground!!)
+                TouchFeatureManager.setSuperReport(prefs.isSuperReport(foreground!!))
+            }
+        } else if (gameModeActive) {
+            gameModeActive = false
+            activePkg = null
+            TouchFeatureManager.setSuperReport(false)
+            TouchFeatureManager.setGameMode(false)
+            setOrientationTracking(false)
+        }
+    }
+
+    private fun applyTuning(pkg: String) {
+        if (prefs.isExpert(pkg)) {
+
+            TouchFeatureManager.setTuning(
+                TouchFeatureManager.TOUCH_EXPERT_MODE,
+                prefs.expertPreset(pkg),
+            )
+            return
+        }
+        TouchFeatureManager.TUNING_RANGES.forEach { (mode, range) ->
+            TouchFeatureManager.setTuning(mode, prefs.tuningValue(pkg, mode, range.def))
         }
     }
 

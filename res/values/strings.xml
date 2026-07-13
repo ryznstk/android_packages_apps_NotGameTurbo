@@ -12,10 +12,37 @@
     <string name="add_app_title">Add app…</string>
     <string name="add_app_dialog_title">Pick an app</string>
 
-    <string name="app_summary">Enable touch game mode while this app is in the foreground</string>
     <string name="no_games_summary">No games detected. Add apps manually below.</string>
+
+    <string name="app_enable_title">Enable game mode</string>
+    <string name="app_enabled">Enabled</string>
+    <string name="app_disabled">Tap to customize</string>
 
     <string name="touch_test_title">Test polling rate</string>
     <string name="touch_test_summary">Drag your finger to measure the touch report rate</string>
     <string name="touch_test_game_mode">Game mode</string>
+    <string name="touch_test_super_report">Super report</string>
+
+    <string name="super_report_title">Super report rate</string>
+    <string name="super_report_summary">480 Hz super-resolution reporting (game mode is 240 Hz)</string>
+
+    <string name="tuning_category_title">Touch tuning (game mode)</string>
+    <string name="tuning_unavailable_summary">Touch tuning is not available on this panel.</string>
+    <string name="tune_up_threshold">Touch-up threshold</string>
+    <string name="tune_tolerance">Jitter tolerance</string>
+    <string name="tune_aim_sensitivity">Aim sensitivity</string>
+    <string name="tune_tap_stability">Tap stability</string>
+    <string name="tune_edge_filter">Edge rejection</string>
+
+    <string name="expert_mode_title">Expert mode</string>
+    <string name="expert_mode_summary">Use a built-in tuning preset instead of the manual values</string>
+    <string name="expert_preset_title">Expert preset</string>
+
+    <string name="debug_title">HAL mode debug</string>
+    <string name="debug_summary">Query touchfeature getters for each mode</string>
+    <string name="debug_querying">Querying…</string>
+    <string name="debug_refresh">Refresh</string>
+
+    <string name="reset_title">Reset to defaults</string>
+    <string name="reset_message">Reset game mode settings for this app to their defaults?</string>
 </resources>

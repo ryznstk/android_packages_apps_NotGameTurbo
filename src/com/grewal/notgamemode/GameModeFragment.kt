@@ -16,7 +16,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
-import androidx.preference.SwitchPreferenceCompat
 import com.android.settingslib.widget.SettingsBasePreferenceFragment
 
 class GameModeFragment : SettingsBasePreferenceFragment() {
@@ -26,6 +25,14 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         prefs = GamePrefs(requireContext())
         rebuild()
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        if (::prefs.isInitialized) {
+            rebuild()
+        }
     }
 
     private fun rebuild() {
@@ -50,6 +57,17 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
             }
         )
 
+        screen.addPreference(
+            Preference(context).apply {
+                title = getString(R.string.debug_title)
+                summary = getString(R.string.debug_summary)
+                setOnPreferenceClickListener {
+                    startActivity(Intent(context, DebugActivity::class.java))
+                    true
+                }
+            }
+        )
+
         val games =
             PreferenceCategory(context).apply { title = getString(R.string.games_category_title) }
         screen.addPreference(games)
@@ -61,7 +79,7 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
                 }
             )
         } else {
-            detected.sortedBy { label(pm, it) }.forEach { games.addPreference(appSwitch(it)) }
+            detected.sortedBy { label(pm, it) }.forEach { games.addPreference(appRow(it)) }
         }
 
         val customCategory =
@@ -70,7 +88,7 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
         custom
             .mapNotNull { runCatching { pm.getApplicationInfo(it, 0) }.getOrNull() }
             .sortedBy { label(pm, it) }
-            .forEach { customCategory.addPreference(appSwitch(it)) }
+            .forEach { customCategory.addPreference(appRow(it)) }
         customCategory.addPreference(
             Preference(context).apply {
                 title = getString(R.string.add_app_title)
@@ -84,18 +102,25 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
         preferenceScreen = screen
     }
 
-    private fun appSwitch(app: ApplicationInfo) =
-        SwitchPreferenceCompat(requireContext()).apply {
-            val pm = requireContext().packageManager
+    private fun appRow(app: ApplicationInfo): Preference {
+        val pm = requireContext().packageManager
+        return Preference(requireContext()).apply {
             title = label(pm, app)
-            summary = getString(R.string.app_summary)
+            summary =
+                getString(
+                    if (prefs.isEnabled(app.packageName)) R.string.app_enabled
+                    else R.string.app_disabled
+                )
             icon = pm.getApplicationIcon(app)
-            isChecked = prefs.isEnabled(app.packageName)
-            setOnPreferenceChangeListener { _, newValue ->
-                prefs.setEnabled(app.packageName, newValue as Boolean)
+            setOnPreferenceClickListener {
+                startActivity(
+                    Intent(requireContext(), AppSettingsActivity::class.java)
+                        .putExtra(AppSettingsActivity.EXTRA_PACKAGE, app.packageName)
+                )
                 true
             }
         }
+    }
 
     private fun showAppPicker() {
         val context = requireContext()
