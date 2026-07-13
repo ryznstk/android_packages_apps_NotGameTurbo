@@ -11,6 +11,9 @@ android_app {
     platform_apis: true,
     privileged: true,
     system_ext_specific: true,
+    dex_preopt: {
+        enabled: false,
+    },
     static_libs: [
         "SettingsLibSliderPreference",
         "androidx.appcompat_appcompat",
