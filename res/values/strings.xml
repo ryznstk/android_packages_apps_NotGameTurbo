@@ -7,6 +7,11 @@
     <string name="app_name">NotGameTurbo</string>
     <string name="settings_summary">Per-app touch game mode and tuning</string>
 
+    <string name="touchfeature_error_title">Touchfeature unavailable</string>
+    <string name="touchfeature_error_message">Failed to bind the touchfeature service, or it was not found. Game mode won\'t work.</string>
+    <string name="retry">Retry</string>
+    <string name="exit">Exit</string>
+
     <string name="games_category_title">Games</string>
     <string name="custom_category_title">Custom apps</string>
 

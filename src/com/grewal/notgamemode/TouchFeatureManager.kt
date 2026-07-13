@@ -62,6 +62,8 @@ object TouchFeatureManager {
                 .onFailure { e -> Log.e(TAG, "failed to get touchfeature service", e) }
                 .getOrNull()
 
+    fun isAvailable(): Boolean = getService() != null
+
     private fun setModeValue(mode: Int, value: Int) {
         val service =
             getService()
