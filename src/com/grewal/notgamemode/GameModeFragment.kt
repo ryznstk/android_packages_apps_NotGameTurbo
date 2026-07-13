@@ -9,6 +9,9 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
@@ -23,8 +26,32 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
     private lateinit var prefs: GamePrefs
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setHasOptionsMenu(true)
         prefs = GamePrefs(requireContext())
         rebuild()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        menu
+            .add(0, MENU_TEST, 0, R.string.touch_test_title)
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu
+            .add(0, MENU_DEBUG, 1, R.string.debug_title)
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            MENU_TEST -> {
+                startActivity(Intent(requireContext(), TouchTestActivity::class.java))
+                true
+            }
+            MENU_DEBUG -> {
+                startActivity(Intent(requireContext(), DebugActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onResume() {
@@ -45,28 +72,6 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
             pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(0)).filter {
                 it.category == ApplicationInfo.CATEGORY_GAME && it.packageName !in custom
             }
-
-        screen.addPreference(
-            Preference(context).apply {
-                title = getString(R.string.touch_test_title)
-                summary = getString(R.string.touch_test_summary)
-                setOnPreferenceClickListener {
-                    startActivity(Intent(context, TouchTestActivity::class.java))
-                    true
-                }
-            }
-        )
-
-        screen.addPreference(
-            Preference(context).apply {
-                title = getString(R.string.debug_title)
-                summary = getString(R.string.debug_summary)
-                setOnPreferenceClickListener {
-                    startActivity(Intent(context, DebugActivity::class.java))
-                    true
-                }
-            }
-        )
 
         val games =
             PreferenceCategory(context).apply { title = getString(R.string.games_category_title) }
@@ -172,4 +177,9 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
 
     private fun label(pm: PackageManager, app: ApplicationInfo) =
         pm.getApplicationLabel(app).toString()
+
+    companion object {
+        private const val MENU_TEST = 1
+        private const val MENU_DEBUG = 2
+    }
 }

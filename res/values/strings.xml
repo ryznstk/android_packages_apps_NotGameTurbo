@@ -19,7 +19,6 @@
     <string name="app_disabled">Tap to customize</string>
 
     <string name="touch_test_title">Test polling rate</string>
-    <string name="touch_test_summary">Drag your finger to measure the touch report rate</string>
     <string name="touch_test_game_mode">Game mode</string>
     <string name="touch_test_super_report">Super report</string>
 
@@ -39,7 +38,6 @@
     <string name="expert_preset_title">Expert preset</string>
 
     <string name="debug_title">HAL mode debug</string>
-    <string name="debug_summary">Query touchfeature getters for each mode</string>
     <string name="debug_querying">Querying…</string>
     <string name="debug_refresh">Refresh</string>
 
