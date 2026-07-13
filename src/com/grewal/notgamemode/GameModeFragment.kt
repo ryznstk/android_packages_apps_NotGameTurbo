@@ -19,6 +19,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
+import androidx.preference.PreferenceViewHolder
 import com.android.settingslib.widget.SettingsBasePreferenceFragment
 
 class GameModeFragment : SettingsBasePreferenceFragment() {
@@ -93,10 +94,11 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
         custom
             .mapNotNull { runCatching { pm.getApplicationInfo(it, 0) }.getOrNull() }
             .sortedBy { label(pm, it) }
-            .forEach { customCategory.addPreference(appRow(it)) }
+            .forEach { customCategory.addPreference(appRow(it, removable = true)) }
         customCategory.addPreference(
             Preference(context).apply {
                 title = getString(R.string.add_app_title)
+                summary = getString(R.string.add_app_summary).takeIf { custom.isNotEmpty() }
                 setOnPreferenceClickListener {
                     showAppPicker()
                     true
@@ -107,9 +109,23 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
         preferenceScreen = screen
     }
 
-    private fun appRow(app: ApplicationInfo): Preference {
+    private fun appRow(app: ApplicationInfo, removable: Boolean = false): Preference {
         val pm = requireContext().packageManager
-        return Preference(requireContext()).apply {
+        val preference =
+            object : Preference(requireContext()) {
+                override fun onBindViewHolder(holder: PreferenceViewHolder) {
+                    super.onBindViewHolder(holder)
+                    holder.itemView.setOnLongClickListener {
+                        if (removable) {
+                            confirmRemoveCustom(app)
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                }
+            }
+        return preference.apply {
             title = label(pm, app)
             summary =
                 if (prefs.isEnabled(app.packageName)) getString(R.string.app_enabled) else null
@@ -122,6 +138,19 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
                 true
             }
         }
+    }
+
+    private fun confirmRemoveCustom(app: ApplicationInfo) {
+        val pm = requireContext().packageManager
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.remove_app_title)
+            .setMessage(getString(R.string.remove_app_message, label(pm, app)))
+            .setPositiveButton(R.string.remove_app_confirm) { _, _ ->
+                prefs.removeCustom(app.packageName)
+                rebuild()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun showAppPicker() {

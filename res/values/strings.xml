@@ -18,6 +18,11 @@
     <string name="add_app_title">Add app…</string>
     <string name="add_app_dialog_title">Pick an app</string>
 
+    <string name="remove_app_title">Remove app</string>
+    <string name="remove_app_message">Remove %1$s from custom apps?</string>
+    <string name="remove_app_confirm">Remove</string>
+    <string name="add_app_summary">Long-press a custom app to remove it</string>
+
     <string name="no_games_summary">No games detected. Add apps manually below.</string>
 
     <string name="app_enable_title">Enable game mode</string>

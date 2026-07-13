@@ -22,6 +22,10 @@ class GamePrefs(context: Context) {
         customPackages = customPackages.toMutableSet().apply { add(pkg) }
     }
 
+    fun removeCustom(pkg: String) {
+        customPackages = customPackages.toMutableSet().apply { remove(pkg) }
+    }
+
     fun isEnabled(pkg: String) = prefs.getBoolean(enabledKey(pkg), false)
 
     fun isSuperReport(pkg: String) = prefs.getBoolean(superKey(pkg), true)
