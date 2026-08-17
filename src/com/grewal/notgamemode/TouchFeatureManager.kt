@@ -5,33 +5,31 @@
 
 package com.grewal.notgamemode
 
-import android.os.Binder
-import android.os.IBinder
-import android.os.ServiceManager
+import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
-import vendor.xiaomi.hw.touchfeature.ITouchFeature
 
 object TouchFeatureManager {
 
     private const val TAG = "GameModeTouchFeature"
 
-    private const val TOUCH_ID = 0
-    private const val TOUCH_GAME_MODE = 0
-    private const val TOUCH_SUPER_REPORT = 202
-    private const val TOUCH_PANEL_ORIENTATION = 8
+    private const val KEY_BACKEND = "backend"
 
+    const val TOUCH_GAME_MODE = 0
     const val TOUCH_UP_THRESHOLD = 2
     const val TOUCH_TOLERANCE = 3
     const val TOUCH_AIM_SENSITIVITY = 4
     const val TOUCH_TAP_STABILITY = 5
     const val TOUCH_EXPERT_MODE = 6
     const val TOUCH_EDGE_FILTER = 7
+    const val TOUCH_PANEL_ORIENTATION = 8
+    const val TOUCH_SUPER_REPORT = 202
 
     data class ModeRange(val min: Int, val max: Int, val def: Int)
 
     val TUNING_RANGES =
         linkedMapOf(
-            TOUCH_UP_THRESHOLD to ModeRange(0, 4, 2),
+            TOUCH_UP_THRESHOLD to ModeRange(0, 4, 3),
             TOUCH_TOLERANCE to ModeRange(0, 4, 2),
             TOUCH_AIM_SENSITIVITY to ModeRange(0, 4, 2),
             TOUCH_TAP_STABILITY to ModeRange(0, 4, 2),
@@ -40,44 +38,55 @@ object TouchFeatureManager {
 
     val EXPERT_RANGE = ModeRange(1, 3, 1)
 
-    @Volatile private var touchFeature: ITouchFeature? = null
+    data class ModeQuery(
+        val cur: Int?,
+        val def: Int?,
+        val min: Int?,
+        val max: Int?,
+        val values: List<Int>?,
+    )
 
-    private val deathRecipient =
-        IBinder.DeathRecipient {
-            Log.w(TAG, "touchfeature service died")
-            touchFeature = null
-        }
+    private val backends = listOf(TouchFeatureBackend, SysfsTouchBackend)
+
+    @Volatile private var prefs: SharedPreferences? = null
+
+    @Volatile private var current: TouchBackend = TouchFeatureBackend
 
     @Synchronized
-    private fun getService(): ITouchFeature? =
-        touchFeature
-            ?: runCatching {
-                    val fqName = "${ITouchFeature.DESCRIPTOR}/default"
-                    val binder = Binder.allowBlocking(ServiceManager.waitForDeclaredService(fqName))
-                    ITouchFeature.Stub.asInterface(binder).apply {
-                        asBinder().linkToDeath(deathRecipient, 0)
-                    }
+    fun attach(context: Context) {
+        if (prefs != null) return
+        prefs =
+            context.applicationContext
+                .createDeviceProtectedStorageContext()
+                .getSharedPreferences(GamePrefs.NAME, Context.MODE_PRIVATE)
+                .also { stored ->
+                    val name = stored.getString(KEY_BACKEND, null) ?: return@also
+                    val backend = runCatching { Backend.valueOf(name) }.getOrNull() ?: return@also
+                    current = backendFor(backend)
+                    Log.i(TAG, "restored $backend backend")
                 }
-                .onSuccess { touchFeature = it }
-                .onFailure { e -> Log.e(TAG, "failed to get touchfeature service", e) }
-                .getOrNull()
-
-    fun isAvailable(): Boolean = getService() != null
-
-    private fun setModeValue(mode: Int, value: Int) {
-        val service =
-            getService()
-                ?: run {
-                    Log.e(TAG, "touchfeature service is null, cannot set mode $mode")
-                    return
-                }
-        runCatching { service.setModeValue(TOUCH_ID, mode, value) }
-            .onFailure { e -> Log.e(TAG, "setModeValue(mode=$mode, value=$value) failed", e) }
     }
 
+    var backend: Backend
+        get() = current.id
+        set(value) {
+            if (current.id == value) return
+            current = backendFor(value)
+            prefs?.edit()?.putString(KEY_BACKEND, value.name)?.apply()
+            Log.i(TAG, "switched to $value backend")
+        }
+
+    private fun backendFor(backend: Backend) = backends.first { it.id == backend }
+
+    fun isAvailable(): Boolean = current.isAvailable()
+    fun isAvailable(backend: Backend): Boolean = backendFor(backend).isAvailable()
+    fun alternativesTo(backend: Backend): List<Backend> =
+        backends.map { it.id }.filter { it != backend }
+    private fun setModeValue(mode: Int, value: Int) = current.setModeValue(mode, value)
     fun setGameMode(enabled: Boolean) {
         Log.i(TAG, "setGameMode: $enabled")
         setModeValue(TOUCH_GAME_MODE, if (enabled) 1 else 0)
+        setSuperReport(enabled)
     }
 
     fun setSuperReport(enabled: Boolean) {
@@ -92,24 +101,5 @@ object TouchFeatureManager {
 
     fun setTuning(mode: Int, value: Int) = setModeValue(mode, value)
 
-    data class ModeQuery(
-        val cur: Int?,
-        val def: Int?,
-        val min: Int?,
-        val max: Int?,
-        val values: List<Int>?,
-    )
-
-    fun queryMode(mode: Int): ModeQuery {
-        val service = getService()
-        fun <T> attempt(block: (ITouchFeature) -> T): T? =
-            service?.let { runCatching { block(it) }.getOrNull() }
-        return ModeQuery(
-            cur = attempt { it.getModeCurValue(TOUCH_ID, mode) },
-            def = attempt { it.getModeDefaultValue(TOUCH_ID, mode) },
-            min = attempt { it.getModeMinValue(TOUCH_ID, mode) },
-            max = attempt { it.getModeMaxValue(TOUCH_ID, mode) },
-            values = attempt { it.getModeValue(TOUCH_ID, mode).toList() },
-        )
-    }
+    fun queryMode(mode: Int): ModeQuery = current.queryMode(mode)
 }

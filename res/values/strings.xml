@@ -9,6 +9,12 @@
 
     <string name="touchfeature_error_title">Touchfeature unavailable</string>
     <string name="touchfeature_error_message">Failed to bind the touchfeature service, or it was not found. Game mode won\'t work.</string>
+    <string name="sysfs_error_title">Touch nodes unavailable</string>
+    <string name="sysfs_error_message">The touch nodes under /sys/class/touch are missing or not writable. Game mode won\'t work.</string>
+    <string name="backend_switch_hal">Use touchfeature</string>
+    <string name="backend_switch_sysfs">Use touch nodes</string>
+    <string name="backend_switched_hal">Switched to touchfeature</string>
+    <string name="backend_switched_sysfs">Switched to touch nodes</string>
     <string name="retry">Retry</string>
     <string name="exit">Exit</string>
 

@@ -79,6 +79,7 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
                 summary = getString(R.string.super_report_summary)
                 setDefaultValue(true)
                 isIconSpaceReserved = false
+                isEnabled = false
             }
         screen.addPreference(superSwitch!!)
 
@@ -140,7 +141,6 @@ class AppSettingsFragment : SettingsBasePreferenceFragment() {
 
         fun updateEnabled() {
 
-            superSwitch?.isEnabled = gameEnabled
             expertSwitch?.isEnabled = gameEnabled
             presetSlider?.isEnabled = gameEnabled && expertOn
             manualSliders.forEach { it.isEnabled = gameEnabled && !expertOn }

@@ -34,6 +34,7 @@ class GameModeService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        TouchFeatureManager.attach(this)
         prefs = GamePrefs(this)
         usageStats = getSystemService(UsageStatsManager::class.java)
         thread = HandlerThread(TAG).apply { start() }
@@ -46,7 +47,6 @@ class GameModeService : Service() {
         handler.removeCallbacks(poll)
         thread.quitSafely()
         if (gameModeActive) {
-            TouchFeatureManager.setSuperReport(false)
             TouchFeatureManager.setGameMode(false)
             setOrientationTracking(false)
             gameModeActive = false
@@ -73,18 +73,15 @@ class GameModeService : Service() {
 
                 applyTuning(foreground!!)
                 TouchFeatureManager.setGameMode(true)
-                TouchFeatureManager.setSuperReport(prefs.isSuperReport(foreground))
                 setOrientationTracking(true)
             } else if (foreground != activePkg) {
 
                 activePkg = foreground
                 applyTuning(foreground!!)
-                TouchFeatureManager.setSuperReport(prefs.isSuperReport(foreground!!))
             }
         } else if (gameModeActive) {
             gameModeActive = false
             activePkg = null
-            TouchFeatureManager.setSuperReport(false)
             TouchFeatureManager.setGameMode(false)
             setOrientationTracking(false)
         }
