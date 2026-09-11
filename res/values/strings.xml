@@ -59,4 +59,10 @@
 
     <string name="reset_title">Reset to defaults</string>
     <string name="reset_message">Reset game mode settings for this app to their defaults?</string>
+
+    <string name="game_mode_tile_title">Game Mode</string>
+    <string name="tile_add">Add Quick Settings tile</string>
+    <string name="tile_added">Tile added</string>
+    <string name="tile_not_added">Tile not added</string>
+    <string name="tile_already_added">Tile already added</string>
 </resources>
