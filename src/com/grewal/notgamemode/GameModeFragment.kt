@@ -34,15 +34,27 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         menu
-            .add(0, MENU_TEST, 0, R.string.touch_test_title)
+            .add(0, MENU_ADD_TILE, 0, R.string.tile_add)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
         menu
-            .add(0, MENU_DEBUG, 1, R.string.debug_title)
+            .add(0, MENU_TEST, 1, R.string.touch_test_title)
+            .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
+        menu
+            .add(0, MENU_DEBUG, 2, R.string.debug_title)
             .setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            MENU_ADD_TILE -> {
+                TileUtils.requestAddTileService(
+                    requireContext(),
+                    GameModeTileService::class.java,
+                    R.string.game_mode_tile_title,
+                    R.drawable.ic_game_mode_tile,
+                )
+                true
+            }
             MENU_TEST -> {
                 startActivity(Intent(requireContext(), TouchTestActivity::class.java))
                 true
@@ -205,6 +217,7 @@ class GameModeFragment : SettingsBasePreferenceFragment() {
         pm.getApplicationLabel(app).toString()
 
     companion object {
+        private const val MENU_ADD_TILE = 0
         private const val MENU_TEST = 1
         private const val MENU_DEBUG = 2
     }
