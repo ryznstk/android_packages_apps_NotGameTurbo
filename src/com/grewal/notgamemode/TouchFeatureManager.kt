@@ -100,6 +100,9 @@ object TouchFeatureManager {
         selectFallbackIfNeeded()
         current.setModeValue(mode, value)
     }
+
+    fun isGameModeActive(): Boolean = isAvailable() && (queryMode(TOUCH_GAME_MODE).cur == 1)
+    
     fun setGameMode(enabled: Boolean) {
         Log.i(TAG, "setGameMode: $enabled")
         setModeValue(TOUCH_GAME_MODE, if (enabled) 1 else 0)
